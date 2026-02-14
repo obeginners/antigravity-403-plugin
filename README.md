@@ -178,29 +178,28 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. For official Docker deployment, you must first update two keys in `config.yaml`:
+3. Edit `config.yaml` (required):
    - `auth-dir: "/app/auths"`
    - `inject-base-url: "http://172.17.0.1:9813"`
+   - If upstream is non-default, also set `cli-upstream` (for example: `http://host.docker.internal:8317`).
 
-4. `docker-compose.yml` already defaults to the official path: `/root/CLIProxyAPI/auths:/app/auths`.
+4. Only for non-default auth path:
+   - In `docker-compose.yml` / `.env`, set `PLUGIN_AUTH_PATH` to your actual CLIProxyAPI auth directory.
+   - Official default path is `/root/CLIProxyAPI/auths`.
 
-5. For non-default deployments, additionally adjust (`PLUGIN_AUTH_PATH`, `cli-upstream`, `listen`).
-   - In `docker-compose.yml` / `.env`, set `PLUGIN_AUTH_PATH` to your actual auth directory.
-   - In `config.yaml`, set `cli-upstream` to: `http://host.docker.internal:8317`
-
-6. Start plugin:
+5. Start plugin:
 
 ```bash
 docker compose up -d
 ```
 
-7. View logs:
+6. View logs:
 
 ```bash
 docker compose logs -f antigravity-403-plugin
 ```
 
-8. Stop plugin:
+7. Stop plugin:
 
 ```bash
 docker compose down

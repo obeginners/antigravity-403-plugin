@@ -1,0 +1,87 @@
+﻿# antigravity-403-plugin 配置示例（适配 CLIProxyAPI-main）
+# 对齐来源：C:\Users\徐\Desktop\CLIProxyAPI-main\config.example.yaml
+# 其中本体默认：host: ""、port: 8317、auth-dir: "~/.cli-proxy-api"
+#
+# 使用方式：
+# 1) 复制本文件为 config.yaml（建议与 exe 放同一目录）
+# 2) 双击 antigravity-403-plugin.exe（或命令行运行）
+# 3) 如需指定其他配置文件：antigravity-403-plugin.exe -config C:\path\to\config.yaml
+#
+# 参数优先级：命令行参数 > 环境变量 > 本文件 > 程序内置默认值
+#
+# 备注：官方 Antigravity 返回 403 时，常见提示文案为：
+# Verification required
+# Please verify your account to continue using Antigravity. Learn more
+# Dismiss
+# Complete verification
+
+# 插件监听地址（插件自己监听的端口）
+listen: "127.0.0.1:9813"
+
+# 本体（CLIProxyAPI-main）地址
+# 这里要与本体 config 的 host/port/tls 对齐：
+# - host: "" + port: 8317 + tls.enable: false  => http://127.0.0.1:8317
+# - 若你改了本体端口或开启 TLS，请同步修改这里
+cli-upstream: "http://127.0.0.1:8317"
+
+# Antigravity 上游地址（支持逗号分隔回退）
+antigravity-upstream: "https://daily-cloudcode-pa.googleapis.com,https://daily-cloudcode-pa.sandbox.googleapis.com"
+
+# TLS 指纹：chrome / firefox
+fingerprint: "chrome"
+
+# 允许代理转发的域名白名单（逗号分隔）
+domains: "cloudcode-pa.googleapis.com,daily-cloudcode-pa.googleapis.com,daily-cloudcode-pa.sandbox.googleapis.com"
+
+# 超时参数（Go duration 格式，例如 15s、90s、2m）
+request-timeout: "90s"
+dial-timeout: "15s"
+
+# 日志清理间隔（启动时先清理一次，运行中按该间隔定时清理）
+# 日志固定写入：logs/plugin.log（单文件追加）
+# 默认留空 ""（从不清理）
+# 如需清理可填 30d（等价写法：720h）
+log-cleanup-interval: ""
+
+# 是否禁用直连
+# false：优先使用系统代理变量（HTTP_PROXY/HTTPS_PROXY）；无代理时直连
+# true：强制直连，忽略系统代理变量
+# 注意：以上为当前插件实现的实际行为
+# （与旧注释“true=强制走系统代理”不同）
+disable-proxy-bypass: false
+
+# 是否禁用 HTTP/2 连接池
+# false：复用连接（性能更好）
+# true：每次新建连接（更保守，性能更低）
+disable-h2-pool: false
+
+# 是否自动把本地插件地址写入 antigravity 凭证文件的 base_url
+# 启用后插件会接管 base_url，并在插件退出（含异常退出）后自动删除 base_url
+inject-auth-base-url: true
+
+# base_url 覆盖值；留空则自动使用 http://<listen>
+inject-base-url: ""
+
+# 是否强制刷新认证文件（用于触发热重载）
+# 留空表示从不刷新
+force-auth-refresh:
+
+# 本体使用的 auth 目录（对齐 CLIProxyAPI-main 默认值）
+# Windows 也支持绝对路径，如：C:/Users/你的用户名/.cli-proxy-api
+auth-dir: "~/.cli-proxy-api"
+
+# 启动后是否执行自检
+self-check: true
+
+# 自检超时（Go duration）
+self-check-timeout: "20s"
+
+# 自检时用于请求本体 /v1/models 的 API Key（可留空）
+# 建议填写你在本体 config 里 api-keys 的其中一个
+self-check-api-key: ""
+
+# 当 gemini_count=0 时，自动恢复重试次数
+self-check-recovery-retries: 3
+
+# 恢复重试间隔（Go duration）
+self-check-recovery-interval: "2s"

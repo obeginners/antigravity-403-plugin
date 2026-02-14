@@ -1,0 +1,19 @@
+# Build artifacts
+*.exe
+/plugin
+dist/
+release/
+
+# Runtime logs
+logs/
+*.log
+
+# Local-only config
+config.yaml
+.env
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

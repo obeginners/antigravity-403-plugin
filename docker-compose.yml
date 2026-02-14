@@ -1,0 +1,33 @@
+services:
+  antigravity-403-plugin:
+    image: ${PLUGIN_IMAGE:-obeginners/antigravity-403-plugin:latest}
+    pull_policy: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${VERSION:-dev}
+        COMMIT: ${COMMIT:-none}
+        BUILD_DATE: ${BUILD_DATE:-unknown}
+    container_name: antigravity-403-plugin
+    user: "0:0"
+    restart: unless-stopped
+    environment:
+      PLUGIN_CONFIG: ${PLUGIN_CONFIG:-/app/config.yaml}
+      PLUGIN_LISTEN: ${PLUGIN_LISTEN:-0.0.0.0:9813}
+      CLIPROXY_UPSTREAM: ${CLIPROXY_UPSTREAM:-http://host.docker.internal:8317}
+      ANTIGRAVITY_UPSTREAM: ${ANTIGRAVITY_UPSTREAM:-https://daily-cloudcode-pa.googleapis.com,https://daily-cloudcode-pa.sandbox.googleapis.com}
+      PLUGIN_AUTH_DIR: ${PLUGIN_AUTH_DIR:-/app/auths}
+      PLUGIN_INJECT_AUTH_BASE_URL: ${PLUGIN_INJECT_AUTH_BASE_URL:-true}
+      PLUGIN_FORCE_AUTH_REFRESH: ${PLUGIN_FORCE_AUTH_REFRESH:-false}
+      PLUGIN_SELF_CHECK: ${PLUGIN_SELF_CHECK:-true}
+      PLUGIN_SELF_CHECK_API_KEY: ${PLUGIN_SELF_CHECK_API_KEY:-}
+      PLUGIN_LOG_CLEANUP_INTERVAL: ${PLUGIN_LOG_CLEANUP_INTERVAL:-}
+    ports:
+      - "9813:9813"
+    volumes:
+      - ${PLUGIN_CONFIG_PATH:-./config.yaml}:/app/config.yaml:ro
+      - ${PLUGIN_AUTH_PATH:-./auths}:/app/auths
+      - ${PLUGIN_LOG_PATH:-./logs}:/app/logs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

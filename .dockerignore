@@ -1,0 +1,16 @@
+.git
+.github
+.idea
+.vscode
+
+logs
+dist
+release
+
+*.exe
+*.log
+
+config.yaml
+auths
+
+README_CN.md

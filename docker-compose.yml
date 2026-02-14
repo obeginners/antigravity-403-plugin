@@ -27,7 +27,7 @@ services:
       - "9813:9813"
     volumes:
       - ${PLUGIN_CONFIG_PATH:-./config.yaml}:/app/config.yaml:ro
-      - ${PLUGIN_AUTH_PATH:-./auths}:/app/auths
+      - ${PLUGIN_AUTH_PATH:-/root/CLIProxyAPI/auths}:/app/auths
       - ${PLUGIN_LOG_PATH:-./logs}:/app/logs
     extra_hosts:
       - "host.docker.internal:host-gateway"

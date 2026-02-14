@@ -178,21 +178,29 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. 非默认部署按需修改 `config.yaml`（例如：`cli-upstream`、`auth-dir`、`listen`）。
+3. 按官方 Docker 路径部署时，必须先手动修改 `config.yaml` 的两个关键项：
+   - `auth-dir: "/app/auths"`
+   - `inject-base-url: "http://172.17.0.1:9813"`
 
-4. 启动插件：
+4. `docker-compose.yml` 默认已使用官方路径：`/root/CLIProxyAPI/auths:/app/auths`，按官方部署可直接使用。
+
+5. 非默认部署时再额外修改（例如：`PLUGIN_AUTH_PATH`、`cli-upstream`、`listen`）。
+   - `docker-compose.yml` / `.env` 里把 `PLUGIN_AUTH_PATH` 改成你的实际 auth 目录。
+   - `config.yaml` 里 `cli-upstream` 填：`http://host.docker.internal:8317`
+
+6. 启动插件：
 
 ```bash
 docker compose up -d
 ```
 
-5. 查看日志：
+7. 查看日志：
 
 ```bash
 docker compose logs -f antigravity-403-plugin
 ```
 
-6. 停止插件：
+8. 停止插件：
 
 ```bash
 docker compose down

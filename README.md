@@ -64,14 +64,10 @@ Official 403 API response:
 .
 - .github/workflows/        # CI workflow
 - cmd/plugin/               # plugin entrypoint
-- docs/                     # project docs
-- examples/                 # runnable examples
 - internal/proxy/           # proxy core implementation
 - .dockerignore
 - .goreleaser.yml
 - config.example.yaml
-- docker-build.ps1
-- docker-build.sh
 - docker-compose.yml
 - Dockerfile
 - README.md

@@ -1,5 +1,0 @@
-listen: "127.0.0.1:9813"
-cli-upstream: "http://127.0.0.1:8317"
-inject-auth-base-url: true
-force-auth-refresh: false
-auth-dir: "~/.cli-proxy-api"

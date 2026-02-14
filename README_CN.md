@@ -64,14 +64,10 @@ Complete verification
 .
 ├─ .github/workflows/        # CI 工作流
 ├─ cmd/plugin/               # 程序入口
-├─ docs/                     # 文档
-├─ examples/                 # 示例
 ├─ internal/proxy/           # 代理核心实现
 ├─ .dockerignore
 ├─ .goreleaser.yml
 ├─ config.example.yaml
-├─ docker-build.ps1
-├─ docker-build.sh
 ├─ docker-compose.yml
 ├─ Dockerfile
 ├─ README.md

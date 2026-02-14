@@ -217,6 +217,7 @@ docker compose down
 
 - 插件本身不提供登录命令。
 - 需要在 CLI 本体中完成登录，并让插件读取同一份 `auths`。
+- 插件运行时会向凭证注入 `base_url`；正常退出后会自动清除插件注入的 `base_url`。
 - CLI 容器登录示例：
 
 ```bash

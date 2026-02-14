@@ -217,6 +217,7 @@ Login/auth note:
 
 - This plugin does not provide login commands.
 - Complete login in CLIProxyAPI and let plugin read the same `auths` data.
+- While running, the plugin injects `base_url` into credentials; on normal exit it automatically removes the injected `base_url`.
 - CLI container login example:
 
 ```bash

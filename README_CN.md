@@ -179,24 +179,19 @@ cp config.example.yaml config.yaml
 ```
 
 3. 修改 `config.yaml`（必改）
-   - 插件要读到 CLI 的同一份 auth，并把 `base_url` 注入为容器可达地址。
+   - 按你的部署把下面命令里的占位值直接改掉再执行：
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml
 sed -i 's#^inject-base-url:.*#inject-base-url: "http://172.17.0.1:9813"#' config.yaml
-```
-
-   - 如果上游不是默认地址，再补充设置 `cli-upstream`：
-
-```bash
 sed -i 's#^cli-upstream:.*#cli-upstream: "http://host.docker.internal:8317"#' config.yaml
 ```
 
-4. 仅当 auth 路径不是默认值时再改 `PLUGIN_AUTH_PATH`（按需）
-   - 官方默认路径是 `/root/CLIProxyAPI/auths`，若你的 CLI auth 在别处才需要改。
+4. 仅当宿主机 auth 路径不是默认值时才改 `docker-compose.yml`（按需）
+   - 官方默认宿主机路径是 `/root/CLIProxyAPI/auths`。
 
 ```bash
-sed -i 's#${PLUGIN_AUTH_PATH:-/root/CLIProxyAPI/auths}:/app/auths#/你的实际auth目录:/app/auths#' docker-compose.yml
+sed -i 's#^\\s*- .*:/app/auths#      - /你的实际auth目录:/app/auths#' docker-compose.yml
 ```
 
 5. 启动插件：

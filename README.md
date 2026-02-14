@@ -179,24 +179,19 @@ cp config.example.yaml config.yaml
 ```
 
 3. Edit `config.yaml` (required)
-   - Plugin must read the same auth set as CLI and inject a container-reachable `base_url`.
+   - Replace placeholder values in the commands below with your deployment values:
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml
 sed -i 's#^inject-base-url:.*#inject-base-url: "http://172.17.0.1:9813"#' config.yaml
-```
-
-   - If upstream is non-default, also set `cli-upstream`:
-
-```bash
 sed -i 's#^cli-upstream:.*#cli-upstream: "http://host.docker.internal:8317"#' config.yaml
 ```
 
-4. Change `PLUGIN_AUTH_PATH` only when your auth path is non-default (optional)
-   - Official default is `/root/CLIProxyAPI/auths`; change only if your CLI auth is elsewhere.
+4. Only change `docker-compose.yml` when host auth path is non-default (optional)
+   - Official default host path is `/root/CLIProxyAPI/auths`.
 
 ```bash
-sed -i 's#${PLUGIN_AUTH_PATH:-/root/CLIProxyAPI/auths}:/app/auths#/your/actual/auth/path:/app/auths#' docker-compose.yml
+sed -i 's#^\\s*- .*:/app/auths#      - /your/actual/auth/path:/app/auths#' docker-compose.yml
 ```
 
 5. Start plugin:

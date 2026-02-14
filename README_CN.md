@@ -183,7 +183,13 @@ cp config.example.yaml config.yaml
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml
+```
+
+```bash
 sed -i 's#^inject-base-url:.*#inject-base-url: "http://172.17.0.1:9813"#' config.yaml
+```
+
+```bash
 sed -i 's#^cli-upstream:.*#cli-upstream: "http://host.docker.internal:8317"#' config.yaml
 ```
 

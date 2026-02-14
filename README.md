@@ -178,7 +178,8 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. Edit `config.yaml` (run directly for official deployment)
+3. Edit `config.yaml` (run directly for official deployment; replace values for non-default deployments)
+   - Replace these keys with your real values when non-default: `auth-dir`, `inject-base-url`, `cli-upstream`.
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml

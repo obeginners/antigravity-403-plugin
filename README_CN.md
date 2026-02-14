@@ -178,7 +178,8 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. 修改 `config.yaml`（官方部署直接执行）
+3. 修改 `config.yaml`（官方部署可直接执行；非官方部署请替换为你的实际值）
+   - 需要按实际替换的项：`auth-dir`、`inject-base-url`、`cli-upstream`。
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml

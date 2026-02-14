@@ -178,14 +178,26 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. 先修改 `config.yaml`（必改）：
-   - `auth-dir: "/app/auths"`
-   - `inject-base-url: "http://172.17.0.1:9813"`
-   - 如果上游不是默认地址，再补充设置 `cli-upstream`（例如：`http://host.docker.internal:8317`）。
+3. 修改 `config.yaml`（必改）
+   - 插件要读到 CLI 的同一份 auth，并把 `base_url` 注入为容器可达地址。
 
-4. 仅当 auth 路径不是默认值时再改：
-   - 在 `docker-compose.yml` / `.env` 里把 `PLUGIN_AUTH_PATH` 改成 CLIProxyAPI 实际 auth 目录。
-   - 官方默认路径是 `/root/CLIProxyAPI/auths`。
+```bash
+sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml
+sed -i 's#^inject-base-url:.*#inject-base-url: "http://172.17.0.1:9813"#' config.yaml
+```
+
+   - 如果上游不是默认地址，再补充设置 `cli-upstream`：
+
+```bash
+sed -i 's#^cli-upstream:.*#cli-upstream: "http://host.docker.internal:8317"#' config.yaml
+```
+
+4. 仅当 auth 路径不是默认值时再改 `PLUGIN_AUTH_PATH`（按需）
+   - 官方默认路径是 `/root/CLIProxyAPI/auths`，若你的 CLI auth 在别处才需要改。
+
+```bash
+sed -i 's#${PLUGIN_AUTH_PATH:-/root/CLIProxyAPI/auths}:/app/auths#/你的实际auth目录:/app/auths#' docker-compose.yml
+```
 
 5. 启动插件：
 

@@ -178,8 +178,7 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. 修改 `config.yaml`（必改）
-   - 按你的部署把下面命令里的占位值直接改掉再执行：
+3. 修改 `config.yaml`（官方部署直接执行）
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml
@@ -187,10 +186,11 @@ sed -i 's#^inject-base-url:.*#inject-base-url: "http://172.17.0.1:9813"#' config
 sed -i 's#^cli-upstream:.*#cli-upstream: "http://host.docker.internal:8317"#' config.yaml
 ```
 
-4. 仅当宿主机 auth 路径不是默认值时才改 `docker-compose.yml`（按需）
-   - 官方默认宿主机路径是 `/root/CLIProxyAPI/auths`。
+4. 仅当你的 auth 目录不是官方默认路径时，再改 `docker-compose.yml`
+   - 官方默认宿主机路径：`/root/CLIProxyAPI/auths`
 
 ```bash
+# 把 /你的实际auth目录 改成你的真实路径
 sed -i 's#^\\s*- .*:/app/auths#      - /你的实际auth目录:/app/auths#' docker-compose.yml
 ```
 

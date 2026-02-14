@@ -178,8 +178,7 @@ cd antigravity-403-plugin
 cp config.example.yaml config.yaml
 ```
 
-3. Edit `config.yaml` (required)
-   - Replace placeholder values in the commands below with your deployment values:
+3. Edit `config.yaml` (run directly for official deployment)
 
 ```bash
 sed -i 's#^auth-dir:.*#auth-dir: "/app/auths"#' config.yaml
@@ -187,10 +186,11 @@ sed -i 's#^inject-base-url:.*#inject-base-url: "http://172.17.0.1:9813"#' config
 sed -i 's#^cli-upstream:.*#cli-upstream: "http://host.docker.internal:8317"#' config.yaml
 ```
 
-4. Only change `docker-compose.yml` when host auth path is non-default (optional)
-   - Official default host path is `/root/CLIProxyAPI/auths`.
+4. Change `docker-compose.yml` only if your auth directory is not the official default
+   - Official default host path: `/root/CLIProxyAPI/auths`
 
 ```bash
+# Replace /your/actual/auth/path with your real path
 sed -i 's#^\\s*- .*:/app/auths#      - /your/actual/auth/path:/app/auths#' docker-compose.yml
 ```
 

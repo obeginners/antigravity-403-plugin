@@ -11,6 +11,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -121,7 +122,7 @@ func main() {
 		DisableHTTP2Pooling:     *disableH2Pool,
 	}
 
-	injectTargetBaseURL := resolveInjectBaseURL(cfg.ListenAddr, strings.TrimSpace(*injectBaseURL))
+	injectTargetBaseURL := resolveInjectBaseURL(cfg.ListenAddr, strings.TrimSpace(*injectBaseURL), cfg.CLIUpstreamAddr)
 
 	if errListen := ensureListenAddrAvailable(cfg.ListenAddr); errListen != nil {
 		log.Fatalf("listen preflight failed on %s: %v", cfg.ListenAddr, errListen)
@@ -722,14 +723,134 @@ func getEnvBool(key string, fallback bool) bool {
 	}
 }
 
-func resolveInjectBaseURL(listenAddr, override string) string {
-	if override != "" {
-		return strings.TrimSuffix(override, "/")
+func resolveInjectBaseURL(listenAddr, override, cliUpstream string) string {
+	target := strings.TrimSpace(override)
+	if target == "" {
+		if strings.HasPrefix(strings.ToLower(listenAddr), "http://") || strings.HasPrefix(strings.ToLower(listenAddr), "https://") {
+			target = strings.TrimSpace(listenAddr)
+		} else {
+			target = "http://" + strings.TrimSpace(listenAddr)
+		}
 	}
-	if strings.HasPrefix(strings.ToLower(listenAddr), "http://") || strings.HasPrefix(strings.ToLower(listenAddr), "https://") {
-		return strings.TrimSuffix(listenAddr, "/")
+	target = strings.TrimSuffix(target, "/")
+
+	corrected, changed := ensureInjectBaseURLReachable(target, cliUpstream)
+	if changed {
+		log.Printf("inject base_url auto-corrected because endpoint unreachable: %s -> %s", target, corrected)
 	}
-	return "http://" + strings.TrimSuffix(listenAddr, "/")
+	return corrected
+}
+
+func ensureInjectBaseURLReachable(baseURL string, cliUpstream string) (string, bool) {
+	target := strings.TrimSuffix(strings.TrimSpace(baseURL), "/")
+	parsed, err := url.Parse(target)
+	if err != nil || parsed == nil || strings.TrimSpace(parsed.Host) == "" {
+		return target, false
+	}
+
+	host := strings.TrimSpace(parsed.Hostname())
+	port := strings.TrimSpace(parsed.Port())
+	if port == "" {
+		if strings.EqualFold(strings.TrimSpace(parsed.Scheme), "https") {
+			port = "443"
+		} else {
+			port = "80"
+		}
+	}
+
+	originHostPort := net.JoinHostPort(host, port)
+	if !isLocalLikeHost(host) && tcpReachable(originHostPort, 1500*time.Millisecond) {
+		return target, false
+	}
+
+	candidates := make([]string, 0, 3)
+	if upstreamHost := extractHostFromURL(cliUpstream); upstreamHost != "" && !isLocalLikeHost(upstreamHost) {
+		candidates = append(candidates, upstreamHost)
+	}
+	if detected := detectOutboundIPv4(); detected != "" && !isLocalLikeHost(detected) {
+		candidates = append(candidates, detected)
+	}
+
+	seen := make(map[string]struct{}, len(candidates))
+	for _, candidateHost := range candidates {
+		candidateHost = strings.TrimSpace(candidateHost)
+		if candidateHost == "" {
+			continue
+		}
+		if _, ok := seen[candidateHost]; ok {
+			continue
+		}
+		seen[candidateHost] = struct{}{}
+
+		candidateHostPort := net.JoinHostPort(candidateHost, port)
+		if !tcpReachable(candidateHostPort, 1500*time.Millisecond) {
+			continue
+		}
+		adjusted := *parsed
+		adjusted.Host = candidateHostPort
+		newURL := strings.TrimSuffix(adjusted.String(), "/")
+		if normalizeURLForCompare(newURL) != normalizeURLForCompare(target) {
+			return newURL, true
+		}
+		return target, false
+	}
+
+	return target, false
+}
+
+func extractHostFromURL(raw string) string {
+	value := strings.TrimSpace(raw)
+	if value == "" {
+		return ""
+	}
+	parsed, err := url.Parse(value)
+	if err != nil || parsed == nil {
+		return ""
+	}
+	if strings.TrimSpace(parsed.Host) == "" {
+		return ""
+	}
+	return strings.TrimSpace(parsed.Hostname())
+}
+
+func isLocalLikeHost(host string) bool {
+	value := strings.TrimSpace(strings.ToLower(host))
+	switch value {
+	case "", "localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]":
+		return true
+	}
+	ip := net.ParseIP(strings.Trim(value, "[]"))
+	if ip == nil {
+		return false
+	}
+	return ip.IsLoopback() || ip.IsUnspecified()
+}
+
+func tcpReachable(addr string, timeout time.Duration) bool {
+	conn, err := net.DialTimeout("tcp", strings.TrimSpace(addr), timeout)
+	if err != nil {
+		return false
+	}
+	_ = conn.Close()
+	return true
+}
+
+func detectOutboundIPv4() string {
+	conn, err := net.DialTimeout("udp", "8.8.8.8:53", 1500*time.Millisecond)
+	if err != nil {
+		return ""
+	}
+	defer conn.Close()
+
+	udpAddr, ok := conn.LocalAddr().(*net.UDPAddr)
+	if !ok || udpAddr == nil {
+		return ""
+	}
+	ip := udpAddr.IP.To4()
+	if ip == nil || ip.IsLoopback() || ip.IsUnspecified() {
+		return ""
+	}
+	return ip.String()
 }
 
 func splitCSV(raw string) []string {
@@ -1201,7 +1322,7 @@ func selfCheckRecoverGeminiModel(
 	interval time.Duration,
 ) {
 	if strings.TrimSpace(baseURL) == "" {
-		baseURL = resolveInjectBaseURL(cfg.ListenAddr, "")
+		baseURL = resolveInjectBaseURL(cfg.ListenAddr, "", cfg.CLIUpstreamAddr)
 	}
 	for i := 1; i <= retries; i++ {
 		updated, err := injectAntigravityBaseURL(authDir, baseURL, true)
